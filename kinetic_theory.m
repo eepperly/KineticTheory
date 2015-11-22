@@ -1,13 +1,16 @@
-function kinetic_theory(X,V,m,r,box_dims,dt,tf)
+function [XHist,VHist] = kinetic_theory(X,V,m,r,box_dims,dt,tf)
 
 xdims = box_dims(1:2);
 ydims = box_dims(3:4);
 zdims = box_dims(5:6);
 
-figure
-scatplot = scatter3(X(:,1),X(:,2),X(:,3));
-axis(box_dims);
+XHist = zeros([size(X,1) size(X,2) 1+length(dt:dt:tf)]);
+VHist = zeros(size(XHist));
 
+XHist(:,:,1) = X;
+VHist(:,:,1) = V;
+
+locationInHist = 2;
 for t = dt:dt:tf
   X = X + dt*V; %update positions
   V = V - 2 * horzcat( ((X(:,1)<xdims(1)) + (X(:,1)>xdims(2))), ((X(:,2)<ydims(1)) + (X(:,2)>ydims(2))), ((X(:,3)<zdims(1)) + (X(:,3)>zdims(2))) ) .* V; %collisions with walls
@@ -21,8 +24,7 @@ for t = dt:dt:tf
       end
     end
   end
-  set(scatplot,'XData',X(:,1));
-  set(scatplot,'YData',X(:,2));
-  set(scatplot,'ZData',X(:,3));
-  drawnow
+  XHist(:,:,locationInHist) = X;
+  VHist(:,:,locationInHist) = V;
+  locationInHist = locationInHist + 1;
 end
